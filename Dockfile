@@ -1,0 +1,46 @@
+# nodejs+mongodb一键启动镜像
+# centos 7
+# nodejs 14.18.1
+# mongodb 5.0.4
+# mongodb设置开机根据配置文件自启
+# mongodb 端口7777
+
+FROM centos:7
+
+MAINTAINER huangwutao 346792184@qq.com
+
+# 预设环境变量
+ENV PATH /usr/local/mongodb/bin:$PATH
+ENV PATH /usr/local/node/bin:$PATH
+
+# 从宿主机copy安装包与配置文件
+COPY ./source/mongodb-linux-x86_64-rhel70-5.0.4.tgz ./source/node-v14.18.1-linux-x64.tar.xz /home/
+COPY ./mongo/mongodb.conf ./mongo/user.js /srv/
+COPY ./mongo/auto.sh /srv/
+
+# 解压安装mongodb和nodejs
+RUN cd /home \
+    # 安装mongodb
+    && tar -zxvf mongodb-linux-x86_64-rhel70-5.0.4.tgz \
+    && mv mongodb-linux-x86_64-rhel70-5.0.4 /usr/local/mongodb \
+    # 安装nodejs
+    && xz -d node-v14.18.1-linux-x64.tar.xz \
+    && tar -xvf node-v14.18.1-linux-x64.tar \
+    && mv node-v14.18.1-linux-x64 /usr/local/node \
+    && rm -rf mongodb-linux-x86_64-rhel70-5.0.4.tgz node-v14.18.1-linux-x64.tar
+
+# 设置mongodb用户权限
+RUN cd /srv \
+    # 初始化数据库目录
+    && mkdir database \
+    && mkdir database/log \
+    && mkdir database/db \
+    && touch database/log/mongodb.log \
+    # 非用户验证启动数据库
+    && mongod --dbpath /srv/database/db --fork --logpath /srv/database/log/mongodb.log --port 7777 \
+    # 创建用户与权限
+    && mongo --port=7777 data /srv/user.js
+
+RUN chmod +x /srv/auto.sh
+# 开机自启服务脚本
+ENTRYPOINT sh -c /srv/auto.sh
