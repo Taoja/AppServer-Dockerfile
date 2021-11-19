@@ -34,10 +34,13 @@ This image allows you to easily create an application server environment based o
 After the container is running, you can use the following command to confirm whether the installation is normal:
 
 ```shell
+# check the version about node
 $ node -v
 v14.18.1
+# check the version about npm
 $ npm -v
 6.14.15
+# check mongo users and permissions
 $ mongo --port=7777
 > use myapp
 > db.auth('dev', '1q2w3e4r')
