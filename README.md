@@ -15,7 +15,8 @@ or
 Use the Image what author built:
 
 ```shell
-$ docker run -it huangwutao/appserver:v1.3 /bin/sh
+$ docker run -it --name { your container name } huangwutao/appserver:v1.4
+$ docker exec -it { your container name } /bin/bash
 ```
 
 ## Image
